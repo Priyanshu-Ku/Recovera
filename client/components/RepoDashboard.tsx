@@ -83,7 +83,7 @@ type IncidentItem = {
 
 export default function RepoDashboard({ repoName }: { repoName: string }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("Issues");
+  const [activeTab, setActiveTab] = useState("Overview");
   const [showInstanceModal, setShowInstanceModal] = useState(false);
   const [incidents, setIncidents] = useState<IncidentItem[]>([]);
   const [repoData, setRepoData] = useState<RepoDetails | null>(null);
@@ -92,17 +92,24 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
   const [deletingRepo, setDeletingRepo] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/incidents?repoFullName=${encodeURIComponent(repoName)}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchIncidents = async () => {
+      try {
+        const res = await fetch(`/api/incidents?repoFullName=${encodeURIComponent(repoName)}`);
+        const data = await res.json();
         if (data.incidents) setIncidents(data.incidents);
         if (data.repository) setRepoData(data.repository);
+      } catch (err) {
+        console.error("Failed to poll incidents:", err);
+      } finally {
         setLoadingIncidents(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch incidents:", err);
-        setLoadingIncidents(false);
-      });
+      }
+    };
+
+    setLoadingIncidents(true);
+    fetchIncidents();
+    
+    const interval = setInterval(fetchIncidents, 5000);
+    return () => clearInterval(interval);
   }, [repoName]);
 
   const handleGenerateFix = async (incidentId: string) => {

@@ -16,6 +16,12 @@ type Activity = {
 export default function AILiveFeed({ repoFullName }: { repoFullName: string }) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isWaiting, setIsWaiting] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsWaiting(false), 60000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -63,7 +69,15 @@ export default function AILiveFeed({ repoFullName }: { repoFullName: string }) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[600px] scrollbar-thin scrollbar-thumb-white/10">
-        {loading && activities.length === 0 ? (
+        {isWaiting ? (
+          <div className="flex flex-col items-center justify-center py-12 text-zinc-500 gap-3">
+            <Clock className="w-8 h-8 animate-spin-slow text-blue-500/50" />
+            <div className="text-center">
+              <p className="text-sm font-medium text-zinc-400">Initializing AI Agent...</p>
+              <p className="text-[10px] text-zinc-600 mt-1">Establishing secure connection to repository</p>
+            </div>
+          </div>
+        ) : loading && activities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-zinc-500 gap-3">
             <Terminal className="w-8 h-8 animate-pulse" />
             <p className="text-xs font-mono">Analyzing telemetry...</p>
