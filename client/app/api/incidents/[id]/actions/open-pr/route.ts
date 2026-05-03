@@ -151,7 +151,19 @@ ${patch.changeSummary}
         }
       );
 
-      return NextResponse.json({ success: true, prUrl: result.prUrl });
+      // Log to SafetyAuditLog so it appears in AI Activity Feed
+      await prisma.safetyAuditLog.create({
+        data: {
+          incidentId: incident.id,
+          actionType: "pr_creation",
+          decision: "PR_CREATED",
+          reasonCodes: "AUTO_REMEDIATION",
+          riskScore: 0,
+          details: `PR Created: ${result.prUrl}`,
+        }
+      });
+
+      return NextResponse.json({ success: true, prUrl: result.prUrl, action });
     } else {
       await prisma.incidentAction.update({
         where: { id: action.id },

@@ -74,24 +74,16 @@ export default function InstanceSelectModal({
         ).filter(Boolean);
         setResources(discovered);
 
-        // Try auto-match: find resource whose name matches the repo name
+        setStep("manual_select");
+        
+        // Still try to find a suggestion to pre-select it or highlight it
         const repoLower = repoName.toLowerCase();
-        const exactMatch = discovered.find(
-          r => r.name.toLowerCase() === repoLower
+        const match = discovered.find(r => 
+          r.name.toLowerCase() === repoLower || 
+          r.name.toLowerCase().includes(repoLower) || 
+          repoLower.includes(r.name.toLowerCase())
         );
-        const partialMatch = !exactMatch
-          ? discovered.find(
-              r => r.name.toLowerCase().includes(repoLower) || repoLower.includes(r.name.toLowerCase())
-            )
-          : null;
-
-        const match = exactMatch || partialMatch;
-        if (match) {
-          setAutoMatch(match);
-          setStep("auto_matched");
-        } else {
-          setStep("manual_select");
-        }
+        if (match) setSelected(match);
       } catch (err: any) {
         setErrorMsg(err.message || "Failed to discover resources");
         setStep("error");

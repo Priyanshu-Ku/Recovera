@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -90,6 +90,7 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
   const [loadingIncidents, setLoadingIncidents] = useState(true);
   const [generatingFix, setGeneratingFix] = useState<Record<string, boolean>>({});
   const [deletingRepo, setDeletingRepo] = useState(false);
+  const [prCreated, setPrCreated] = useState(false);
 
   useEffect(() => {
     const fetchIncidents = async () => {
@@ -108,9 +109,31 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
     setLoadingIncidents(true);
     fetchIncidents();
     
-    const interval = setInterval(fetchIncidents, 5000);
+    // Poll every 5 minutes to avoid constant refresh
+    const interval = setInterval(fetchIncidents, 300000);
     return () => clearInterval(interval);
   }, [repoName]);
+
+  // Called by AILiveFeed when the simulated anomaly is detected
+  const handleSimulatedIssue = () => {
+    const simIncident: IncidentItem = {
+      id: `sim-${Date.now()}`,
+      title: "ReferenceError: AbortController is not defined",
+      severity: "critical",
+      status: "DETECTED",
+      confidence: 0.98,
+      createdAt: new Date().toISOString(),
+      patches: [],
+      actions: [],
+      rcaVersions: []
+    };
+    setIncidents(prev => [simIncident, ...prev]);
+  };
+
+  // Called by AILiveFeed when PR is created
+  const handlePRCreated = () => {
+    setPrCreated(true);
+  };
 
   const handleGenerateFix = async (incidentId: string) => {
     setGeneratingFix(prev => ({ ...prev, [incidentId]: true }));
@@ -280,6 +303,28 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
 
   return (
     <div className="min-h-screen bg-black text-white pt-20 pb-12 px-8 max-w-6xl mx-auto">
+      {/* PR Created Banner */}
+      <AnimatePresence>
+        {prCreated && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-6 py-4 shadow-2xl backdrop-blur-sm"
+          >
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <GitBranch className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-emerald-300">✅ PR Created Successfully</p>
+              <p className="text-[11px] text-emerald-400/70">fix(autosre): inject AbortController polyfill — awaiting human review</p>
+            </div>
+            <button onClick={() => setPrCreated(false)} className="ml-4 text-zinc-500 hover:text-white text-xs">
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Top Navigation & Header Area */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -313,9 +358,9 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
                   <GitBranch className="w-4 h-4" />
                   {repoData?.defaultBranch || "main"}
                 </span>
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-                  System Healthy
+                <span className={`flex items-center gap-1.5 ${openIssues > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  <span className={`w-2 h-2 rounded-full ${openIssues > 0 ? 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.8)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'} animate-pulse`} />
+                  {openIssues > 0 ? 'System Health: Low' : 'System Healthy'}
                 </span>
               </div>
             </div>
@@ -490,7 +535,7 @@ export default function RepoDashboard({ repoName }: { repoName: string }) {
               transition={{ delay: 0.3 }}
               className="lg:col-span-3"
             >
-              <AILiveFeed repoFullName={repoName} />
+              <AILiveFeed repoFullName={repoName} key={`feed-${repoName}`} onIssueDetected={handleSimulatedIssue} onPRCreated={handlePRCreated} />
             </motion.div>
           </div>
 
