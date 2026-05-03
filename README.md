@@ -17,7 +17,7 @@ Modern engineering teams receive huge volumes of production logs and alerts, but
   - Priyanshu Kumar (Team Lead) [https://github.com/Priyanshu8023]
   - Anshit Gupta [https://github.com/Anshit-Gupta]
   - Vedant A [https://github.com/V3DxNT]
-  - Priyanshu Kumar
+  - Priyanshu Kumar [https://github.com/Priyanshu-Ku]
 
 ## Demo
 
