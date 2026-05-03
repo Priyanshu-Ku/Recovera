@@ -6,6 +6,18 @@ Core pipeline:
 
 `Logs -> Detection -> RCA -> Fix Generation -> PR Creation -> Safety-Gated Automation`
 
+## Problem Statement
+
+Modern engineering teams receive huge volumes of production logs and alerts, but root-cause investigation and remediation are still mostly manual. This slows incident response, increases downtime, and creates operational fatigue. Recovera addresses this by automating the path from detection to safe, reviewable fixes.
+
+## Team Details
+
+- Team Name: `champaran coders`
+
+## Demo
+
+- Demo Link: https://drive.google.com/file/d/1SfO5jKV9pYUv7NR5GFOCqIYiwpbH1St5/view?usp=drivesdk
+
 ## Key Features
 
 ### Foundation and Integrations
