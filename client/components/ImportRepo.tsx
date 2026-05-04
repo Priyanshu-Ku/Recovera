@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import InstanceSelectModal from "./InstanceSelectModal";
 import IAMCredentialModal from "./IAMCredentialModal";
-import IntegrateModal from "./IntegrateModal";
 
 interface Repo {
   id: number;
@@ -88,11 +87,7 @@ export default function ImportRepo() {
 
   const handleImport = (repo: Repo) => {
     setSelectedRepo(repo);
-    if (!credentialId) {
-      setIsIAMModalOpen(true);
-      return;
-    }
-    setIsModalOpen(true);
+    setIsIAMModalOpen(true);
   };
 
   const handleIAMSuccess = (newCredentialId: string) => {
@@ -120,12 +115,13 @@ export default function ImportRepo() {
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-10"
+          className="mb-8"
         >
           <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">Step 1 of 2</p>
           <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Import Git Repository</h1>
           <p className="text-zinc-400 text-sm">Select a repository to connect it with Recovera's autonomous SRE engine.</p>
         </motion.div>
+
 
         {/* Search */}
         <motion.div
@@ -214,7 +210,7 @@ export default function ImportRepo() {
                   </div>
 
                   <button
-                    onClick={() => setShowIntegrate(true)}
+                    onClick={() => handleImport(repo)}
                     className="flex-shrink-0 ml-4 flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-orange-500/10 to-amber-500/10 text-orange-300 text-xs font-medium rounded-lg border border-orange-500/20 hover:border-orange-500/40 hover:from-orange-500/15 hover:to-amber-500/15 transition-all active:scale-95 shadow-sm"
                   >
                     <Cloud className="w-3 h-3" />
@@ -283,10 +279,6 @@ export default function ImportRepo() {
         onSuccess={handleIAMSuccess}
       />
 
-      <IntegrateModal
-        isOpen={showIntegrate}
-        onClose={() => setShowIntegrate(false)}
-      />
     </div>
   );
 }
